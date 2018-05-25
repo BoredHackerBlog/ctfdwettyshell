@@ -8,6 +8,7 @@ git clone https://github.com/BoredHackerBlog/ctfdwettyshell
 ```
 
 Setup:
+
 0. Modify the Dockerfile file to fit whatever needs you have.
 1. Build a docker image with the Dockerfile file.
 ```
