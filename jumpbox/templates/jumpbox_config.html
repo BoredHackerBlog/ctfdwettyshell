@@ -1,0 +1,78 @@
+{% extends 'admin/base.html' %}
+{% block content %}
+<div class="jumbotron">
+    <div class="container">
+        <h1>Jumpbox Config</h1>
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            {% for error in errors %}
+            <div class="alert alert-danger alert-dismissable" role="alert">
+                <span class="sr-only">Error:</span>
+                {{ error }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+            </div>
+            {% endfor %}
+            <form method="post" accept-charset="utf-8" autocomplete="off" role="form" name='jumpbox_config' class="form-horizontal" enctype="multipart/form-data">
+                <div class="form-group">
+                    <p>Enabled?</p>
+                    <input type="checkbox" name="enabled" id="enabled" value="true" onclick="enable_file_form(this.checked)" {% if config.enabled %}checked{% endif %} />
+                </div>
+                <div class="form-group">
+                    <label for="hostname-input">
+                        Hostname
+                    </label>
+                    {% if config.hostname %}
+                    <input class="form-control" type="text" name="hostname" id="hostname-input" placeholder="Ex: 10.10.10.10" value='{{ config.hostname }}' {% if not config.enabled %} disabled {% endif %}/>
+                    {% else %}
+                    <input class="form-control" type="text" name="hostname" id="hostname-input" placeholder="Ex: 10.10.10.10" {% if not config.enabled %} disabled {% endif %}/>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="username-input">
+                        Username
+                    </label>
+                    {% if config.username %}
+                    <input class="form-control" type="text" name="username" id="username-input" value='{{ config.username }}' {% if not config.enabled %} disabled {% endif %}/>
+                    {% else %}
+                    <input class="form-control" type="text" name="username" id="username-input" {% if not config.enabled %} disabled {% endif %}/>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="private-key">
+                        Private Key {% if config.private_key %} (Uploaded. Adding a new file will overwrite.) {% endif %}
+                    </label>
+                    <input class="form-control" type="file" name="private_key" id="private_key" {% if not config.enabled %} disabled {% endif %} {% if config.enabled and not config.private_key %} required {% endif %} />
+                </div>
+                {{ form.nonce() }}
+                <div class="col-md-13 text-center">
+                    <button type="submit" tabindex="0" class="btn btn-md btn-primary btn-outlined">
+                        Submit
+                    </button>
+                </div>
+        </div>
+        <input type="hidden" name="id" value="1">
+        </form>
+    </div>
+</div>
+{% endblock content %}
+{% block scripts %}
+<script>
+
+function enable_file_form(status) {
+    var priv_key = "{{ 'true' if config.private_key else 'false' }}";
+    status=!status; 
+    document.jumpbox_config.private_key.disabled = status;
+    if (!priv_key) {
+        document.jumpbox_config.private_key.required = !status;
+    }
+    document.jumpbox_config.username.disabled = status;
+    document.jumpbox_config.username.required = !status;
+    document.jumpbox_config.hostname.disabled = status;
+    document.jumpbox_config.hostname.required = !status;
+}
+
+</script>
+{% endblock scripts %}

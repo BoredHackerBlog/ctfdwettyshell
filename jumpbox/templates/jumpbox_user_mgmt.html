@@ -1,0 +1,186 @@
+{% extends 'admin/base.html' %}
+{% block content %}
+<div class="jumbotron">
+    <div class="container">
+        <h1>Current Users:</h1>
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            {% for error in errors %}
+            <div class="alert alert-danger alert-dismissable" role="alert">
+                <span class="sr-only">Error:</span>
+                {{ error }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+            </div>
+            {% endfor %}
+            {% if users %}
+            <table id='users' class="table table-striped">
+                <thead>
+                    <tr>
+                        <th width="10px" class="text-center" style="cursor: pointer;" onclick="sortTable(0)">ID</th>
+                        <th class="text-left" style="cursor: pointer;" onclick="sortTable(1)">{% if users[0].team_id %}Team{% else %}User{% endif %}</th>
+                        <th class="text-left" style="cursor: pointer;" onclick="sortTable(2)">Username</th>
+                        <th class="text-left" style="cursor: pointer;" onclick="sortTable(3)">Password</th>
+                        <th class="text-left">Revoke</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr id='tr_{{user.id}}' name='{{user.id}}'>
+                        <td class='text-center' value='{{user.id}}'>{{user.id}}</td>
+                        {% if user.team_id %}
+                        <td class='text-center' value='{{user.team_id | safe }}'>{{user.team_id | safe }}</td>
+                        {% else %}
+                        <td class='text-center' value='{{user.team_id | safe }}'>{{user.user_id | safe }}</td>
+                        {% endif %}
+                        <td class='text-center' value='{{user.username}}'>{{user.username}}</td>
+                        <td class='text-center' value='{{user.password | safe }}'>{{user.password | safe }}</td>
+                        <td class='text-center'><a id="delete_{{user.instance_id}}" style="cursor: pointer;" class="fas fa-trash" onclick="check_delete_user('{{user.id}}', false)"></a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div class='text-center'>
+                <button type="button" class="btn btn-danger" onclick="check_delete_user(null, true)">Delete All Users</button>
+            </div>
+            {% else %}
+            <h3 class='text-center'> No User Accounts Created</h3>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock content %}
+{% block scripts %}
+<script>
+function sortTable(n) {
+    var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+    table = document.getElementById("users");
+    switching = true;
+    dir = "asc";
+    while (switching) {
+        switching = false;
+        rows = table.rows;
+        for (i = 1; i < (rows.length - 1); i++) {
+            shouldSwitch = false;
+            x = rows[i].getElementsByTagName("TD")[n];
+            y = rows[i + 1].getElementsByTagName("TD")[n];
+            if (dir == "asc") {
+                if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                    shouldSwitch = true;
+                    break;
+                }
+            } else if (dir == "desc") {
+                if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                    shouldSwitch = true;
+                    break;
+                }
+            }
+        }
+        if (shouldSwitch) {
+            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+            switching = true;
+            switchcount++;
+        } else {
+            if (switchcount == 0 && dir == "asc") {
+                dir = "desc";
+                switching = true;
+            }
+        }
+    }
+}
+</script>
+<script>
+function check_delete_user(id, all) {
+    ezq({
+        title: "Attention!",
+        body: "Are You Sure You want to do this?",
+        success: function() { delete_user(id, all) },
+    });
+}
+
+function delete_user(id, all) {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            window.location = '{{ script_root }}/admin/jumpbox_user_mgmt'
+        } else if (this.readyState == 4 && this.status != 200) {
+            ezal({
+                title: "Attention!",
+                body: "Error when Deleting User Account",
+                button: "Got it!",
+            });
+        }
+    };
+    xhttp.open("GET", "/api/v1/delete_jump_user?id=" + id + "&all=" + all, true);
+    xhttp.send();
+}
+</script>
+<script>
+var modal =
+    '<div class="modal fade" tabindex="-1" role="dialog">' +
+    '  <div class="modal-dialog" role="document">' +
+    '    <div class="modal-content">' +
+    '      <div class="modal-header">' +
+    '        <h5 class="modal-title">{0}</h5>' +
+    '        <button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
+    '          <span aria-hidden="true">&times;</span>' +
+    "        </button>" +
+    "      </div>" +
+    '      <div class="modal-body">' +
+    "        <p>{1}</p>" +
+    "      </div>" +
+    '      <div class="modal-footer">' +
+    "      </div>" +
+    "    </div>" +
+    "  </div>" +
+    "</div>";
+
+function ezq(args) {
+    var res = modal.format(args.title, args.body);
+    var obj = $(res);
+    var deny =
+        '<button type="button" class="btn btn-danger" data-dismiss="modal">No</button>';
+    var confirm = $(
+        '<button type="button" class="btn btn-primary" data-dismiss="modal">Yes</button>'
+    );
+
+    obj.find(".modal-footer").append(deny);
+    obj.find(".modal-footer").append(confirm);
+
+    $("main").append(obj);
+
+    $(obj).on("hidden.bs.modal", function(e) {
+        $(this).modal("dispose");
+    });
+
+    $(confirm).click(function() {
+        args.success();
+    });
+
+    obj.modal("show");
+
+    return obj;
+}
+
+function ezal(args) {
+    var res = modal.format(args.title, args.body);
+    var obj = $(res);
+    var button = '<button type="button" class="btn btn-primary" data-dismiss="modal">{0}</button>'.format(
+        args.button
+    );
+
+    obj.find(".modal-footer").append(button);
+    $("main").append(obj);
+
+    obj.modal("show");
+
+    $(obj).on("hidden.bs.modal", function(e) {
+        $(this).modal("dispose");
+    });
+
+    return obj;
+}
+</script>
+{% endblock scripts %}

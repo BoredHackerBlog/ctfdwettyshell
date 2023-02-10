@@ -1,0 +1,14 @@
+[
+	{
+	    "name": "Jumpbox Config",
+	    "route": "/admin/jumpbox_config"
+	},
+	{
+	    "name": "Jumpbox User Management",
+	    "route": "/admin/jumpbox_user_mgmt"
+	},
+	{
+	    "name": "Terminal",
+	    "route": "/terminal"
+	}
+]

@@ -1,0 +1,31 @@
+{% extends 'page.html' %}
+{% block content %}
+<div class="jumbotron">
+    <div class="container">
+        <h1>Jumpbox Info</h1>
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            {% for error in errors %}
+            <div class="alert alert-danger alert-dismissable" role="alert">
+                <span class="sr-only">Error:</span>
+                {{ error }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+            </div>
+            {% endfor %}
+            {% if config.enabled %}
+            <p><b>Username:</b> {{ config.username }}</p>
+            <p><b>Password:</b> {{ config.password }}</p>
+            <p><b>Hostname:</b> {{ config.hostname }}</p>
+            <br><br>
+            <p>You can connect via ssh using:</p>
+            <pre>ssh {{ config.username }}@{{ config.hostname }}</pre>
+            {% else %}
+            <p><b>Jumpbox not configured yet!</b></p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock content %}
