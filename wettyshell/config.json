@@ -1,0 +1,10 @@
+[
+	{
+	    "name": "Jumpbox Config",
+	    "route": "/admin/jumpbox_config"
+	},
+	{
+	    "name": "Terminal",
+	    "route": "/terminal"
+	}
+]
