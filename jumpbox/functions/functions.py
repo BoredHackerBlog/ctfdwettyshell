@@ -2,14 +2,17 @@ import paramiko
 
 
 def execute_ssh_cmd(hostname, host_user, private_key, ssh_cmd):
-    private_key = paramiko.RSAKey.from_private_key_file(private_key)
-    ssh = paramiko.SSHClient()
-    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    ssh.connect(hostname, username=host_user, pkey=private_key)
-    _, stdout, _ = ssh.exec_command(ssh_cmd)
-    exit_status = stdout.channel.recv_exit_status()
-    ssh.close()
-    return exit_status == 0
+    try:
+        private_key = paramiko.RSAKey.from_private_key_file(private_key)
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        ssh.connect(hostname, username=host_user, pkey=private_key)
+        _, stdout, _ = ssh.exec_command(ssh_cmd)
+        exit_status = stdout.channel.recv_exit_status()
+        ssh.close()
+        return exit_status == 0
+    except FileNotFoundError:
+        return False
 
 
 def ssh_user_add(hostname, host_user, private_key, username, password):

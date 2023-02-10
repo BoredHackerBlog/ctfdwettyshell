@@ -116,15 +116,22 @@ def define_jumpbox_user_status(app):
                     jumpbox.team_id = session.id
                 else:
                     jumpbox.user_id = session.id
-                ssh_user_add(
+                success = ssh_user_add(
                     hostname=J.hostname,
                     host_user=J.username,
                     private_key=J.private_key,
                     username=username,
                     password=password,
                 )
-                db.session.add(jumpbox)
-                db.session.commit()
+                if success:
+                    db.session.add(jumpbox)
+                    db.session.commit()
+                else:
+                    return render_template(
+                        "jumpbox_user.html",
+                        config={"enabled": False},
+                        errors=["Failed to create user account!"],
+                    )
             return_data = {
                 "enabled": J.enabled,
                 "username": username,
