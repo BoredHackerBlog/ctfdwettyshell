@@ -62,9 +62,12 @@
 <script>
 
 function enable_file_form(status) {
+    var priv_key = "{{ 'true' if config.private_key else 'false' }}";
     status=!status; 
     document.jumpbox_config.private_key.disabled = status;
-    document.jumpbox_config.private_key.required = !status;
+    if (!priv_key) {
+        document.jumpbox_config.private_key.required = !status;
+    }
     document.jumpbox_config.username.disabled = status;
     document.jumpbox_config.username.required = !status;
     document.jumpbox_config.hostname.disabled = status;
